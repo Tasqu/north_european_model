@@ -23,6 +23,19 @@ def main(input_folder, config_file):
     # Reset workflow_run_successfully
     workflow_run_successfully = False
 
+    # Normalize paths
+    input_folder = Path(input_folder)
+    cfg_path = Path(config_file)
+
+    # Check input folder exists
+    if not input_folder.exists() or not input_folder.is_dir():
+        print(f"Could not find directory {input_folder.resolve()}, please check spelling")
+        return 1  # or: sys.exit(1)
+
+    # Check config file exists
+    if not cfg_path.exists() or not cfg_path.is_file():
+        print(f"Could not find file {cfg_path.resolve()}, please check spelling")
+        return 1  # or: sys.exit(1)
 
 
     # --- 2. Loading config file, fetching parameters needed to launch pipelines ---
@@ -103,7 +116,7 @@ def main(input_folder, config_file):
 
         # Run if needed, otherwise print skip message
         if cache_manager.reimport_source_excels:
-            log_status("Processing source Excel files.", log_messages, level="run")
+            log_status("Processing source Excel files.", log_messages, level="run", add_empty_line_before=True)
             source_excel_data_pipeline.run()
             log_messages.extend(source_excel_data_pipeline.logs)
             log_status("Source excel files processed successfully.", log_messages, level="info")
@@ -145,7 +158,6 @@ def main(input_folder, config_file):
                 df_transferdata=source_excel_data_pipeline.df_transferdata,
                 df_unittypedata=source_excel_data_pipeline.df_unittypedata,
                 df_unitdata=source_excel_data_pipeline.df_unitdata,
-                df_remove_units=source_excel_data_pipeline.df_remove_units,
                 df_storagedata=source_excel_data_pipeline.df_storagedata,
                 df_fueldata=source_excel_data_pipeline.df_fueldata,
                 df_emissiondata=source_excel_data_pipeline.df_emissiondata,
