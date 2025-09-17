@@ -247,4 +247,7 @@ p_gnBoundaryPropertiesForStates(gn_tmp, 'reference', 'constant')
 * project specific modifications
 * --------------------------------------------------------------------------------
 
-
+* All invest units become available at the beginning of the model
+unit_invest(unit)${p_unit(unit, 'maxUnitCount')} = yes;
+p_unit(unit_invest, 'becomeAvailable') = 2;
+option clear = unit_invest;
