@@ -19,6 +19,8 @@ $offtext
 * --- Model Definition - Invest -----------------------------------------------
 * =============================================================================
 
+* TLDR: Solve a full year as a single model (albeit samples later define the representative periods).
+
 if (mType('invest'),
     m('invest') = yes; // Definition, that the model exists by its name
 
@@ -36,56 +38,60 @@ if (mType('invest'),
 * --- Model Time Structure ----------------------------------------------------
 * =============================================================================
 
+* TLDR: Define representative periods here. Currently 3 weeks which are roughly equally spaced?
+
 * --- Define Samples ----------------------------------------------------------
 
     // Number of samples used by the model
-    mSettings('invest', 'samples') = 3;
+    mSettings('invest', 'samples') = 4;
 
     // Clear Initial and Central samples
     ms_initial('invest', s) = no;
     ms_initial('invest', 's000') = yes;
     ms_initial('invest', 's001') = yes;
     ms_initial('invest', 's002') = yes;
+    ms_initial('invest', 's003') = yes;
     ms_central('invest', s) = no;
 
     // Define time span of samples
-    // For selecting the samples, see, for example, https://doi.org/10.1016/j.energy.2020.118585.
-    // The duration of the samples can be, for example, 1 day or 1 week (24 h or 168 h).
-    // The samples can have different durations.
     // msStart=1 means that t000001 is the first active time step in the sample
     // msEnd=169 means that t000168 is the last active time step in the sample 
-    msStart('invest', 's000') = 1;
+    // Here, we've selected the weeks to match solstices and equinoxes.
+    msStart('invest', 's000') = 1 + 11*168; // Spring equinox, March 20th
     msEnd('invest', 's000') = msStart('invest', 's000') + 168;
-    msStart('invest', 's001') = 1 + 18*168;
+    msStart('invest', 's001') = 1 + 24*168; // Summer solstice, ~June 20th
     msEnd('invest', 's001') = msStart('invest', 's001') + 168;
-    msStart('invest', 's002') = 1 + 35*168;
+    msStart('invest', 's002') = 1 + 37*168; // Fall equinox, ~September 22th
     msEnd('invest', 's002') = msStart('invest', 's002') + 168;
+    msStart('invest', 's003') = 1 + 50*168; // Winter solstics, ~December 21st
+    msEnd('invest', 's003') = msStart('invest', 's002') + 168;
 
     // Define the probability of samples
     // Probabilities are 1 in deterministic model runs.
-    // It is also possible to include, for example, 3 samples from a cold year with a probability of 1/10
-    // and 3 samples from a normal year year with a probability of 9/10.
     p_msProbability('invest', s) = 0;
     p_msProbability('invest', 's000') = 1;
     p_msProbability('invest', 's001') = 1;
     p_msProbability('invest', 's002') = 1;
+    p_msProbability('invest', 's003') = 1;
     // Define the weight of samples
     // Weights describe how many times the samples are repeated in order to get the (typically) annual results.
     // For example, 3 samples with equal weights and with a duration of 1 week should be repeated 17.38 times in order
     // to cover the 52.14 weeks of the year.
     // Weights are used for scaling energy production and consumption results and for estimating node state evolution.
     p_msWeight('invest', s) = 0;
-    p_msWeight('invest', 's000') = 8760/168/3;
-    p_msWeight('invest', 's001') = 8760/168/3;
-    p_msWeight('invest', 's002') = 8760/168/3;
+    p_msWeight('invest', 's000') = 8760/168/4;
+    p_msWeight('invest', 's001') = p_msWeight('invest', 's000');
+    p_msWeight('invest', 's002') = p_msWeight('invest', 's000');
+    p_msWeight('invest', 's003') = p_msWeight('invest', 's000');
     // Define the weight of samples in the calculation of fixed costs
     // The sum of p_msAnnuityWeight should be 1 over the samples belonging to the same year.
     // The p_msAnnuityWeight parameter is used for describing which samples belong to the same year so that the model
     // is able to calculate investment costs and fixed operation and maintenance costs once per year.
     p_msAnnuityWeight('invest', s) = 0;
-    p_msAnnuityWeight('invest', 's000') = 1/3;
-    p_msAnnuityWeight('invest', 's001') = 1/3;
-    p_msAnnuityWeight('invest', 's002') = 1/3;
+    p_msAnnuityWeight('invest', 's000') = 1/4;
+    p_msAnnuityWeight('invest', 's001') = p_msAnnuityWeight('invest', 's000');
+    p_msAnnuityWeight('invest', 's002') = p_msAnnuityWeight('invest', 's000');
+    p_msAnnuityWeight('invest', 's003') = p_msAnnuityWeight('invest', 's000');
 
 * --- Define Time Step Intervals ----------------------------------------------
 
@@ -100,7 +106,7 @@ if (mType('invest'),
 
     // number of candidate periods in model
     // please provide this data
-    mSettings('invest', 'candidate_periods') = 10;
+    mSettings('invest', 'candidate_periods') = 0;
 
     // add the candidate periods to model
     // no need to touch this part
@@ -114,20 +120,22 @@ if (mType('invest'),
     // sequence.
     // please provide this data
     zs(z,s) = no;
-    zs('z000','s000') = yes;
-    zs('z001','s000') = yes;
-    zs('z002','s001') = yes;
-    zs('z003','s001') = yes;
-    zs('z004','s002') = yes;
-    zs('z005','s003') = yes;
-    zs('z006','s004') = yes;
-    zs('z007','s002') = yes;
-    zs('z008','s002') = yes;
-    zs('z009','s004') = yes;
+*    zs('z000','s000') = yes;
+*    zs('z001','s000') = yes;
+*    zs('z002','s001') = yes;
+*    zs('z003','s001') = yes;
+*    zs('z004','s002') = yes;
+*    zs('z005','s003') = yes;
+*    zs('z006','s004') = yes;
+*    zs('z007','s002') = yes;
+*    zs('z008','s002') = yes;
+*    zs('z009','s004') = yes;
 
 * =============================================================================
 * --- Model Forecast Structure ------------------------------------------------
 * =============================================================================
+
+* TLDR: No forecasts for an investment run.
 
     // Define the number of forecasts used by the model
     mSettings('invest', 'forecasts') = 0;
@@ -155,15 +163,17 @@ if (mType('invest'),
 * --- Model Features ----------------------------------------------------------
 * =============================================================================
 
+* TLDR: No reserves, no changing unit approximations, no initialization, no incremental heat rates.
+
 * --- Define Reserve Properties -----------------------------------------------
 
     // Lenght of reserve horizon
-    mSettingsReservesInUse('invest', 'primary', 'up') = no;
-    mSettingsReservesInUse('invest', 'primary', 'down') = no;
-    mSettingsReservesInUse('invest', 'secondary', 'up') = no;
-    mSettingsReservesInUse('invest', 'secondary', 'down') = no;
-    mSettingsReservesInUse('invest', 'tertiary', 'up') = no;
-    mSettingsReservesInUse('invest', 'tertiary', 'down') = no;
+*    mSettingsReservesInUse('invest', 'primary', 'up') = no;
+*    mSettingsReservesInUse('invest', 'primary', 'down') = no;
+*    mSettingsReservesInUse('invest', 'secondary', 'up') = no;
+*    mSettingsReservesInUse('invest', 'secondary', 'down') = no;
+*    mSettingsReservesInUse('invest', 'tertiary', 'up') = no;
+*    mSettingsReservesInUse('invest', 'tertiary', 'down') = no;
 
 * --- Define Unit Approximations ----------------------------------------------
 
@@ -189,6 +199,8 @@ if (mType('invest'),
 * =============================================================================
 * --- Solver Features ---------------------------------------------------------
 * =============================================================================
+
+* TLDR: No advanced basis, dummies included, automatic rounding enabled.
 
 * --- Control the solver ------------------------------------------------------
 

@@ -20,7 +20,7 @@ $offtext
 * =============================================================================
 
 // Include desired model definition files here
-$include '%input_dir%/scheduleInit.gms'
+$include '%input_dir%/investInit.gms'
 
 * =============================================================================
 * --- Optional Data Manipulation ----------------------------------------------
