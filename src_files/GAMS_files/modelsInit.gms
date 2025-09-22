@@ -25,3 +25,25 @@ $include '%input_dir%/investInit.gms'
 * =============================================================================
 * --- Optional Data Manipulation ----------------------------------------------
 * =============================================================================
+
+// Define representative period node state bounds.
+// First, storages with no inter-sample dynamics:
+loop(ms_initial('invest', s),
+    gnss_bound(gn_state('batterystor', node), s, s) = yes;
+    gnss_bound(gn_state('heatsto', node), s, s) = yes;
+    gnss_bound(gn_state('largeheatsto', node), s, s) = yes;
+    gnss_bound(gn_state('ror', node), s, s) = yes;
+);
+
+// Declare temporary set displacement operator for inter-sample dynamics
+PARAMETER ds(s) "Sample-displacement operator for cyclic inter-sample gnss bounds";
+ds(s) = 1;
+ds(s)${ord(s) = card(s)} = 1 - card(s);
+
+// Next, storages with inter-sample dynamics:
+loop(ms_initial('invest', s),
+    gnss_bound(gn_state('psClosed', node), s, s+ds(s)) = yes;
+    gnss_bound(gn_state('psOpen', node), s, s+ds(s)) = yes;
+    gnss_bound(gn_state('reservoir', node), s, s+ds(s)) = yes;
+    gnss_bound(gn_state('seasonheatsto', node), s, s+ds(s)) = yes;
+);

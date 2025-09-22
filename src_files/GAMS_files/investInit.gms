@@ -31,8 +31,11 @@ if (mType('invest'),
     mSettings('invest', 't_end') = 8760; // Last time step to be included in the solve (may solve and output more time steps in case t_jump does not match)
 
     // Define simulation horizon and moving horizon optimization "speed"
-    mSettings('invest', 't_horizon') = 8760;   // How many active time steps the solve contains (aggregation of time steps does not impact this, unless the aggregation does not match)
-    mSettings('invest', 't_jump') = 8760;      // How many time steps the model rolls forward between each solve
+    mSettings('invest', 't_horizon') = mSettings('invest', 't_end');   // How many active time steps the solve contains (aggregation of time steps does not impact this, unless the aggregation does not match)
+    mSettings('invest', 't_jump') = mSettings('invest', 't_end');      // How many time steps the model rolls forward between each solve
+
+    // Define length of data for proper circulation
+    mSettings('schedule', 'dataLength') =  mSettings('invest', 't_end');
 
 * =============================================================================
 * --- Model Time Structure ----------------------------------------------------
@@ -46,52 +49,37 @@ if (mType('invest'),
     mSettings('invest', 'samples') = 4;
 
     // Clear Initial and Central samples
-    ms_initial('invest', s) = no;
-    ms_initial('invest', 's000') = yes;
-    ms_initial('invest', 's001') = yes;
-    ms_initial('invest', 's002') = yes;
-    ms_initial('invest', 's003') = yes;
+    ms_initial('invest', s)$(ord(s) <= mSettings('invest', 'samples')) = yes;
     ms_central('invest', s) = no;
+
+    // Define the probability of samples
+    // Probabilities are 1 in deterministic model runs.
+    p_msProbability(ms_initial) = 1;
 
     // Define time span of samples
     // msStart=1 means that t000001 is the first active time step in the sample
     // msEnd=169 means that t000168 is the last active time step in the sample 
     // Here, we've selected the weeks to match solstices and equinoxes.
     msStart('invest', 's000') = 1 + 11*168; // Spring equinox, March 20th
-    msEnd('invest', 's000') = msStart('invest', 's000') + 168;
     msStart('invest', 's001') = 1 + 24*168; // Summer solstice, ~June 20th
-    msEnd('invest', 's001') = msStart('invest', 's001') + 168;
     msStart('invest', 's002') = 1 + 37*168; // Fall equinox, ~September 22th
-    msEnd('invest', 's002') = msStart('invest', 's002') + 168;
     msStart('invest', 's003') = 1 + 50*168; // Winter solstics, ~December 21st
-    msEnd('invest', 's003') = msStart('invest', 's002') + 168;
+    tmp = 168;
+    msEnd(ms_initial) = msStart(ms_initial) + tmp;
 
-    // Define the probability of samples
-    // Probabilities are 1 in deterministic model runs.
-    p_msProbability('invest', s) = 0;
-    p_msProbability('invest', 's000') = 1;
-    p_msProbability('invest', 's001') = 1;
-    p_msProbability('invest', 's002') = 1;
-    p_msProbability('invest', 's003') = 1;
     // Define the weight of samples
     // Weights describe how many times the samples are repeated in order to get the (typically) annual results.
     // For example, 3 samples with equal weights and with a duration of 1 week should be repeated 17.38 times in order
     // to cover the 52.14 weeks of the year.
     // Weights are used for scaling energy production and consumption results and for estimating node state evolution.
-    p_msWeight('invest', s) = 0;
-    p_msWeight('invest', 's000') = 8760/168/4;
-    p_msWeight('invest', 's001') = p_msWeight('invest', 's000');
-    p_msWeight('invest', 's002') = p_msWeight('invest', 's000');
-    p_msWeight('invest', 's003') = p_msWeight('invest', 's000');
+    p_msWeight(ms_initial) = mSettings('invest', 't_end')/mSettings('invest', 'samples')/tmp;
+    option clear = tmp; // Clear temporary period length.
+
     // Define the weight of samples in the calculation of fixed costs
     // The sum of p_msAnnuityWeight should be 1 over the samples belonging to the same year.
     // The p_msAnnuityWeight parameter is used for describing which samples belong to the same year so that the model
     // is able to calculate investment costs and fixed operation and maintenance costs once per year.
-    p_msAnnuityWeight('invest', s) = 0;
-    p_msAnnuityWeight('invest', 's000') = 1/4;
-    p_msAnnuityWeight('invest', 's001') = p_msAnnuityWeight('invest', 's000');
-    p_msAnnuityWeight('invest', 's002') = p_msAnnuityWeight('invest', 's000');
-    p_msAnnuityWeight('invest', 's003') = p_msAnnuityWeight('invest', 's000');
+    p_msAnnuityWeight(ms_initial) = 1/mSettings('invest', 'samples');
 
 * --- Define Time Step Intervals ----------------------------------------------
 
@@ -100,7 +88,7 @@ if (mType('invest'),
 
     // Define the time step intervals in time-steps
     mInterval('invest', 'stepsPerInterval', 'c000') = 1;
-    mInterval('invest', 'lastStepInIntervalBlock', 'c000') = 8760;
+    mInterval('invest', 'lastStepInIntervalBlock', 'c000') = mSettings('invest', 't_end');
 
 * --- z-structure for superpositioned nodes ----------------------------------
 
@@ -120,16 +108,6 @@ if (mType('invest'),
     // sequence.
     // please provide this data
     zs(z,s) = no;
-*    zs('z000','s000') = yes;
-*    zs('z001','s000') = yes;
-*    zs('z002','s001') = yes;
-*    zs('z003','s001') = yes;
-*    zs('z004','s002') = yes;
-*    zs('z005','s003') = yes;
-*    zs('z006','s004') = yes;
-*    zs('z007','s002') = yes;
-*    zs('z008','s002') = yes;
-*    zs('z009','s004') = yes;
 
 * =============================================================================
 * --- Model Forecast Structure ------------------------------------------------
@@ -147,17 +125,14 @@ if (mType('invest'),
     mSettings('invest', 't_forecastJump') = 0;                 // Number of time steps between each update of the forecasts
 
     // Define Realized and Central forecasts
-    mf_realization('invest', f) = no;
     mf_realization('invest', 'f00') = yes;
-    mf_central('invest', f) = no;
     mf_central('invest', 'f00') = yes;
 
     // Define forecast probabilities (weights)
-    p_mfProbability('invest', f) = 0;
     p_mfProbability(mf_realization('invest', f)) = 1;
 
     // Define active model features
-    active('invest', 'storageValue') = yes;
+    active('invest', 'storageValue') = yes; // TODO: Is this necessary?
 
 * =============================================================================
 * --- Model Features ----------------------------------------------------------
