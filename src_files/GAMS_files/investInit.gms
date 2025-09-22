@@ -64,7 +64,7 @@ if (mType('invest'),
     msStart('invest', 's001') = 1 + 24*168; // Summer solstice, ~June 20th
     msStart('invest', 's002') = 1 + 37*168; // Fall equinox, ~September 22th
     msStart('invest', 's003') = 1 + 50*168; // Winter solstics, ~December 21st
-    tmp = 168;
+    tmp = %representative_period_length_in_hours%;
     msEnd(ms_initial) = msStart(ms_initial) + tmp;
 
     // Define the weight of samples
