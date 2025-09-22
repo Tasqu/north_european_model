@@ -35,7 +35,7 @@ if (mType('invest'),
     mSettings('invest', 't_jump') = mSettings('invest', 't_end');      // How many time steps the model rolls forward between each solve
 
     // Define length of data for proper circulation
-    mSettings('schedule', 'dataLength') =  mSettings('invest', 't_end');
+    mSettings('invest', 'dataLength') =  mSettings('invest', 't_end');
 
 * =============================================================================
 * --- Model Time Structure ----------------------------------------------------
