@@ -47,3 +47,10 @@ loop(ms_initial('invest', s),
     gnss_bound(gn_state('reservoir', node), s, s+ds(s)) = yes;
     gnss_bound(gn_state('seasonheatsto', node), s, s+ds(s)) = yes;
 );
+
+// Bind investments for energy storage charging and discharging units.
+alias(unit_invest, unit_invest_);
+uu_bindInvestments(unit_invest, unit_invest_)${
+    sum(gnu_output(grid, node, unit_invest), p_gnu_io(grid, node, unit_invest, 'output', 'upperLimitCapacityRatio')) // Charging units determining storage capacity investments.
+    and sum(gnu_output(grid, node, unit_invest), gnu_input(grid, node, unit_invest_)) // Discharging units taking input from said energy storage.
+} = yes;

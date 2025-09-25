@@ -248,6 +248,10 @@ p_gnBoundaryPropertiesForStates(gn_tmp, 'reference', 'constant')
 * --------------------------------------------------------------------------------
 
 * All invest units become available at the beginning of the model
-unit_invest(unit)${p_unit(unit, 'maxUnitCount')} = yes;
-p_unit(unit_invest, 'becomeAvailable') = 2;
+unit_invest(unit)${p_unit(unit, 'maxUnitCount')} = yes; // Deduce units with investments
+p_unit(unit_invest, 'becomeAvailable') = 2; // Set investment availability to the second timestep in the model (first doesn't work)
 option clear = unit_invest;
+
+* Declare new set for binding unit investments.
+SET uu_bindInvestments(unit, unit) "Force equal `v_invest` variables for two units.";
+uu_bindInvestments(unit, unit) = no;
