@@ -48,6 +48,9 @@ loop(ms_initial('invest', s),
     gnss_bound(gn_state('seasonheatsto', node), s, s+ds(s)) = yes;
 );
 
+// Release bound starts, rely completely on gnss_bounds
+p_gn(gn_state, 'boundStart') = 0;
+
 // Bind investments for energy storage charging and discharging units.
 alias(unit_invest, unit_invest_);
 uu_bindInvestments(unit_invest, unit_invest_)${
