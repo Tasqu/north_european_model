@@ -38,7 +38,7 @@ loop(ms_initial('invest', s),
 // Declare temporary set displacement operator for inter-sample dynamics
 PARAMETER ds(s) "Sample-displacement operator for cyclic inter-sample gnss bounds";
 ds(s) = 1;
-ds(s)${ord(s) = card(s)} = 1 - card(s);
+ds(s)${ord(s) = mSettings('invest', 'samples')} = 1 - ord(s);
 
 // Next, storages with inter-sample dynamics:
 loop(ms_initial('invest', s),

@@ -45,41 +45,7 @@ if (mType('invest'),
 
 * --- Define Samples ----------------------------------------------------------
 
-    // Number of samples used by the model
-    mSettings('invest', 'samples') = 4;
-
-    // Clear Initial and Central samples
-    ms_initial('invest', s)$(ord(s) <= mSettings('invest', 'samples')) = yes;
-    ms_central('invest', s) = no;
-
-    // Define the probability of samples
-    // Probabilities are 1 in deterministic model runs.
-    p_msProbability(ms_initial) = 1;
-
-    // Define time span of samples
-    // msStart=1 means that t000001 is the first active time step in the sample
-    // msEnd=169 means that t000168 is the last active time step in the sample 
-    // Here, we've selected the weeks to match solstices and equinoxes.
-    msStart('invest', 's000') = 1 + 11*168; // Spring equinox, March 20th
-    msStart('invest', 's001') = 1 + 24*168; // Summer solstice, ~June 20th
-    msStart('invest', 's002') = 1 + 37*168; // Fall equinox, ~September 22th
-    msStart('invest', 's003') = 1 + 50*168; // Winter solstics, ~December 21st
-    tmp = %representative_period_length_in_hours%;
-    msEnd(ms_initial) = msStart(ms_initial) + tmp;
-
-    // Define the weight of samples
-    // Weights describe how many times the samples are repeated in order to get the (typically) annual results.
-    // For example, 3 samples with equal weights and with a duration of 1 week should be repeated 17.38 times in order
-    // to cover the 52.14 weeks of the year.
-    // Weights are used for scaling energy production and consumption results and for estimating node state evolution.
-    p_msWeight(ms_initial) = mSettings('invest', 't_end')/mSettings('invest', 'samples')/tmp;
-    option clear = tmp; // Clear temporary period length.
-
-    // Define the weight of samples in the calculation of fixed costs
-    // The sum of p_msAnnuityWeight should be 1 over the samples belonging to the same year.
-    // The p_msAnnuityWeight parameter is used for describing which samples belong to the same year so that the model
-    // is able to calculate investment costs and fixed operation and maintenance costs once per year.
-    p_msAnnuityWeight(ms_initial) = 1/mSettings('invest', 'samples');
+    $$include '%input_dir%\samples_%climateYear%.inc'
 
 * --- Define Time Step Intervals ----------------------------------------------
 
