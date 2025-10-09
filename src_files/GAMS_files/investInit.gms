@@ -41,8 +41,6 @@ if (mType('invest'),
 * --- Model Time Structure ----------------------------------------------------
 * =============================================================================
 
-* TLDR: Define representative periods here. Currently 3 weeks which are roughly equally spaced?
-
 * --- Define Samples ----------------------------------------------------------
 
     $$include '%input_dir%\samples_%climateYear%.inc'
