@@ -44,7 +44,7 @@ if (mType('invest'),
 * --- Define Samples ----------------------------------------------------------
 
     $$include '%input_dir%\samples_%climateYear%.inc'
-    // Currently, the NE-model has an infeasibility if a sample starts at 1.
+    // Currently, the NE-model risks infeasibility if a sample starts at 1.
     // Temporary fix to delay by 1 hour.
     msStart(ms_initial)${msStart(ms_initial) = 1} = 2;
 
